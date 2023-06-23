@@ -9,7 +9,10 @@ func (oq OrderQeue) Less(i, j int) bool {
 	return oq.Orders[i].Price < oq.Orders[j].Price
 }
 
-//Método Swap
+// Método Swap
+func (oq OrderQeue) Swap(i, j int) bool {
+	oq.Orders[i], oq.Orders[j] = oq.Orders[j], oq.Orders[i]
+}
 
 //Método Len
 
