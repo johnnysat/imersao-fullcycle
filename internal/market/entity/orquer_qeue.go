@@ -11,7 +11,7 @@ func (oq OrderQeue) Less(i, j int) bool {
 
 // Método Swap
 func (oq OrderQeue) Swap(i, j int) bool {
-	oq.Orders[i], oq.Orders[j] = oq.Orders[j], oq.Orders[i]
+	return oq.Orders[i], oq.Orders[j] = oq.Orders[j], oq.Orders[i]
 }
 
 //Método Len
