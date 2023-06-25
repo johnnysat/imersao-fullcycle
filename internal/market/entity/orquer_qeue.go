@@ -14,7 +14,10 @@ func (oq OrderQeue) Swap(i, j int) {
 	oq.Orders[i], oq.Orders[j] = oq.Orders[j], oq.Orders[i]
 }
 
-//Método Len
+// Método Len
+func (oq OrderQeue) Len() int {
+	return len(oq.Orders)
+}
 
 // Método Push
 
