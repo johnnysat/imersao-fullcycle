@@ -1,6 +1,9 @@
 package entity
 
-import "sync"
+import (
+	"container/heap"
+	"sync"
+)
 
 type Book struct {
 	Order         []*Order
@@ -17,5 +20,49 @@ func NewBook(orderChan chan *Order, orderChanOut chan *Order, wg *sync.WaitGroup
 		OrdersChan:    orderChan,
 		OrdersChanOut: orderChanOut,
 		Wg:            wg,
+	}
+}
+
+func (b *Book) Trade() {
+	buyOrders := NewOrderQeue()
+	sellOrders := NewOrderQeue()
+
+	heap.Init(buyOrders)
+	heap.Init(sellOrders)
+
+	for order := range b.OrdersChan {
+		if order.OrderType == "BUY" {
+			buyOrders.Push(order)
+			if sellOrders.Len() > 0 && sellOrders.Orders[0].Price <= order.Price {
+				sellOrder := sellOrders.Pop().(*Order)
+				if sellOrder.PendingShares > 0 {
+					transaction := NewTransaction(sellOrder, order, order.Shares, sellOrder.Price)
+					b.AddTransaction(transaction, b.Wg)
+					sellOrder.Transactions = append(sellOrder.Transactions, transaction)
+					order.Transactions = append(order.Transactions, transaction)
+					b.OrdersChanOut <- sellOrder
+					b.OrdersChanOut <- order
+					if sellOrder.PendingShares > 0 {
+						sellOrders.Push(sellOrder)
+					}
+				}
+			}
+		} else if order.OrderType == "SELL" {
+			sellOrders.Push(order)
+			if buyOrders.Len() > 0 && buyOrders.Orders[0].Price >= order.Price {
+				buyOrder := buyOrders.Pop().(*Order)
+				if buyOrder.PendingShares > 0 {
+					transaction := NewTransaction(order, buyOrder, order.Shares, buyOrder.Price)
+					b.AddTransaction(transaction, b.Wg)
+					buyOrder.Transactions = append(buyOrder.Transactions, transaction)
+					order.Transactions = append(order.Transactions, transaction)
+					b.OrdersChanOut <- buyOrder
+					b.OrdersChanOut <- order
+					if buyOrder.PendingShares > 0 {
+						buyOrders.Push(buyOrder)
+					}
+				}
+			}
+		}
 	}
 }
