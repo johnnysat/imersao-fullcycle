@@ -25,11 +25,14 @@ func (oq *OrderQeue) Push(x interface{}) {
 }
 
 // Método Pop
-
 func (oq *OrderQeue) Pop() interface{} {
 	old := oq.Orders
 	n := len(old)
 	item := old[n-1]
 	oq.Orders = old[0 : n-1]
 	return item
+}
+
+func NewOrderQeue() *OrderQeue {
+	return &OrderQeue{}
 }
