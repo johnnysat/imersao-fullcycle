@@ -5,7 +5,6 @@ type Order struct {
 	Investor      *Investor
 	Asset         *Asset
 	Shares        int
-	Pedido        string
 	PendingShares int
 	Price         float64
 	OrderType     string
